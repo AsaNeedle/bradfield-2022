@@ -11,4 +11,5 @@ The protocol version was 6. The databas was called postgres and the user was cal
 
 iii. How many total bytes were sent over the socket for the SELECT query and corresponding response?
 100 bytes were sent for the query, and 290 bytes were received for the response.
-<img width="173" alt="Screen Shot 2022-03-28 at 7 02 20 PM" src="https://user-images.githubusercontent.com/43149404/160501151-34146319-0b38-4d58-8961-c57105ca4b6a.png">
+
+<img width="906" alt="query_response" src="https://user-images.githubusercontent.com/43149404/160501629-6fad4434-ea12-4546-b402-8de428d8d588.png">
