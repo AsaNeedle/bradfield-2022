@@ -1,0 +1,17 @@
+1. What ”data model” does Bigtable provide? How would you provide the same basic functionality using in-memory data structures?      
+
+The data model that Bigtable provides is a map of strings, each containing a row, a column, and a timestamp. For example, in storing snapshots of webpages, the rows might be URLs and the columns are various pieces of data about that URL. In addition, some columns keep track of several values for the same cell, either the last N number of values, or all values within a certain time frame (i.e. the last week), and the timestamp is used to distinguish them. Rows are sorted lexicographically. Also, there are column families, which allow us to more quickly find where a particular column is, especially for large tables. To implement the same basic functionality in memory, you might store these webpages as semi-structured data, for example a dictionary of objects which each represent a url, with the reversed url as the key. Within each url object, there might be a key for “snapshot” and an array with N number of snapshots.
+
+2. What other Google systems does Bigtable depend on, and what are the roles of those other systems? 
+
+Bigtable depends on Google File Service to write and store data files. It also depends on Chubby, which is uses check there is just one master server, keep track of every table server, and tell us where data is located in the tablet server system.
+
+3. When a client tries to perform a read, how does Bigtable find the requested data, assuming all relevant caches are initially empty? 
+
+The client first checks its own cache, to see if it knows where the tablet that contains the data it wants is. If the cache is empty, it sends a request to Chubby to check the root tablet in the METADATA table for the location of the tablet that contains the data it wants. The client can then communicate directly with the relevant tablet server without going through the master server. The request should also contain the column family name, to help Chubby locate the tablet server with the column on it.
+
+* Suppose you wanted to scale up your URL shortener to support 1 million weekly active users. Would a Bigtable cluster consisting of 512 tablet servers be a good fit for your use case? Why or why not? 
+
+First, let's estimate the size of a random read or write. I estimate that for a URL shortener, a random read or write would be less than the 1000 bytes used as standard in the Bigtable performance evaluation. Nonetheless, let's take that as a starting place. How many random writes would there be per second? If there are 1 million active users, let's estimate that an average weekly active user creates 10 urls in a week. At 10 million writes a week, that makes about 17 writes a second on average. We can estimate that peek usage might be ten times the average, giving us 170 writes per second. If we imagine that random reads are 20 times random writes (people visit a redirect url 20 times more often than create one) then we can say that we need 3400 random reads per second. 
+
+We can see from the graph that a 500 tablet cluster can handle 120500 random reads a second, and a million random writes a second. So a 512 tablet cluster seems to be much larger than necessary. A much lower number of tablet servers would be better, especially since we see a drastic decrease in per tablet throughput for random reads as we go from 1 to 50 tablet servers, and random read is the most common type of query.
