@@ -6,7 +6,7 @@ def utf_converter(utf8_string):
             if cur_codepoint != 0:
                 result.append(cur_codepoint)
                 cur_codepoint = 0
-            result.append(bytearray(byte))
+            result.append(byte)
         elif byte < 192:
             cur_codepoint = cur_codepoint << 6
             cur_codepoint += byte & 63
