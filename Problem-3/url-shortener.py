@@ -39,23 +39,21 @@ def get_request_data(request):
 
     return 'hello'
 
-last_url = [0, 0, 0, 0, 0]
-pos_char = 'abcdefghijklmnopqrstuvwxyz'
-
-def increment_url():
-    for index,value in enumerate(last_url):
-        if value != 25:
-            last_url[index] += 1
+def increment_url(previous_url):
+    new_url = list(previous_url)
+    for index,value in enumerate(new_url):
+        if value != 'z':
+            new_url[index] = chr(ord(value) + 1)
             break
         else:
-            last_url[index] = 0
+            new_url[index] = 'a'
+    return ''.join(new_url)
 
 def get_next_url():
-    result = ""
-    for i in last_url:
-        result += pos_char[i]
-    increment_url()
-    return result    
+    previous_url = execute_psql('recent')
+    if previous_url is None:
+        previous_url = 'aaaaa'
+    return increment_url(previous_url)   
 
 while True:    
 
